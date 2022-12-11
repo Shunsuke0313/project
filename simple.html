@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Chatアプリ</title>
+<link rel="stylesheet" href="reset.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<!-- コンテンツ表示画面 -->
+<div>
+    <div class="container">
+        <div class="chat-area"></div>
+        <div class="message-area">
+            <div class="name-area-text">
+                <input type="text" id="uname" placeholder="名前を入力" class="enter_name">
+            </div>
+            <div class="message-area-text">
+                <textarea name="" id="text" cols="30" rows="10" placeholder="メッセージを入力" class="enter_text"></textarea>
+            </div>
+            <div class="message-area-button">
+                <button id="send">送信</button>
+            </div>
+        </div>
+        <div class="remove-button">
+            <button id="remove">削除</button>
+        </div>
+    </div>
+</div>
+
+<!--/ コンテンツ表示画面 -->
+
+
+
+<!-- JQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- JQuery -->
+
+
+<!--** 以下Firebase **-->
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+    import { getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved }
+        from "https://cdnjs.cloudflare.com/ajax/libs/firebase/9.14.0/firebase-database.js";
+    // FIrebase SDKを利用する際、バージョンを揃えなければエラーになる
+    // 文末の「.min」を削除
+
+        // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "",
+      authDomain: "fir-demo-f6a12.firebaseapp.com",
+      projectId: "fir-demo-f6a12",
+      storageBucket: "fir-demo-f6a12.appspot.com",
+      messagingSenderId: "423994971014",
+      appId: "1:423994971014:web:6f23b7ed734fa29aa91207"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+
+    const db = getDatabase(app);  //Realtime DBに接続
+    const dbRef = ref(db, "chat"); //Realtime DB内のchatを参照する
+
+    // #sendがクリックされたら、名前・本文情報を取得する
+    $("#send").on("click",function(){
+        const msg = {
+            uname:$("#uname").val(),
+            text:$("#text").val()
+        };
+        const newPostRef =  push(dbRef);
+        // ↑それぞれのデータ群にユニークコードを付与するもの
+        console.log("newPostRef:", newPostRef);
+        set(newPostRef, msg)
+        $("#uname").val("");
+        $("#text").val("");
+    });
+
+    //firebaseに情報が追加されたら、起きること（チャットに表示）
+    onChildAdded(dbRef, function(data){
+        const msg = data.val();
+        const key = data.key;
+        let h =""; 
+        if (msg.uname == $("#uname").val()){
+            h = `<p class="right_balloon">${msg.text}</p><p class="clear_balloon"></p>`
+        }else {
+            h = `<p class="left_balloon">${msg.text}</p><p class="clear_balloon"></p>`
+        };
+        $(".chat-area").append(h); 
+    });
+    // onChildAdded：①データを全部引っこ抜く、➁「データの追加」等動的な動きが着火点となる
+    
+    //「enter」で送信出来るようにする
+    $("#text").on("keydown",function(e){
+        console.log(e.keyCode);
+        if(e.keyCode == 13){
+            const msg = {
+            uname:$("#uname").val(),
+            text:$("#text").val()
+        };
+        const newPostRef =  push(dbRef);
+        console.log("newPostRef:", newPostRef);
+        set(newPostRef, msg)
+    }
+    });
+
+    // 削除ボタンを押したら全部消える
+
+
+    // 送信ボタンをホバーしたら色が変わる
+    $(function () {
+        $("#send").hover(
+            function () {
+            $(this).css('background', 'blue');
+        },
+        function () {
+            $(this).css('background', '#61E739');
+    }
+  )
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
